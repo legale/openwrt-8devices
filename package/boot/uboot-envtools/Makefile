@@ -9,20 +9,22 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=uboot-envtools
 PKG_DISTNAME:=u-boot
-PKG_VERSION:=2014.10
-PKG_RELEASE:=2
+PKG_VERSION:=2015.10
+PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/u-boot-$(PKG_VERSION)
 PKG_SOURCE:=$(PKG_DISTNAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=\
 	http://mirror2.openwrt.org/sources \
 	ftp://ftp.denx.de/pub/u-boot
-PKG_MD5SUM:=3ddcaee2f05b7c464778112ec83664b5
+PKG_HASH:=bdc68d5f9455ad933b059c735d983f2c8b6b552dafb062e5ff1444f623021955
 
 PKG_BUILD_DEPENDS:=+fstools
 
 PKG_LICENSE:=GPL-2.0 GPL-2.0+
 PKG_LICENSE_FILES:=Licenses/README
+
+PKG_FLAGS:=nonshared
 
 PKG_BUILD_PARALLEL:=1
 
@@ -31,6 +33,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/uboot-envtools
   SECTION:=utils
   CATEGORY:=Utilities
+  SUBMENU:=Boot Loaders
   TITLE:=read/modify U-Boot bootloader environment
   URL:=http://www.denx.de/wiki/U-Boot
 endef
@@ -46,16 +49,19 @@ endef
 define Build/Configure
 	touch $(PKG_BUILD_DIR)/include/config.mk
 	touch $(PKG_BUILD_DIR)/include/config.h
+	mkdir -p $(PKG_BUILD_DIR)/include/generated
+	touch $(PKG_BUILD_DIR)/include/generated/autoconf.h
 endef
 
-TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include -fpie
+TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include
 
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
 		TARGET_CFLAGS="$(TARGET_CFLAGS)" \
-		HOSTLDFLAGS="$(TARGET_LDFLAGS) -pie" \
 		UBI="$(CONFIG_UBOOT_ENVTOOLS_UBI)" \
+		dot-config=0 \
+		HOSTLDFLAGS= \
 		env
 endef
 
@@ -82,6 +88,10 @@ ifneq ($(CONFIG_TARGET_imx6),)
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DATA) ./files/imx6 $(1)/etc/uci-defaults/30_uboot-envtools
 endif
+ifneq ($(CONFIG_TARGET_ipq806x),)
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DATA) ./files/ipq $(1)/etc/uci-defaults/30_uboot-envtools
+endif
 ifneq ($(CONFIG_TARGET_kirkwood),)
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DATA) ./files/kirkwood $(1)/etc/uci-defaults/30_uboot-envtools
@@ -105,10 +115,6 @@ endif
 ifneq ($(CONFIG_TARGET_ramips),)
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DATA) ./files/ramips $(1)/etc/uci-defaults/30_uboot-envtools
-endif
-ifneq ($(CONFIG_TARGET_ipq806x)$(CONFIG_TARGET_ipq),)
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_DATA) ./files/ipq806x $(1)/etc/uci-defaults/30_uboot-envtools
 endif
 endef
 
