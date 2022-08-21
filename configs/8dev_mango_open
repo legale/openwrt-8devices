@@ -439,8 +439,6 @@ CONFIG_DEVEL=y
 # CONFIG_BROKEN is not set
 CONFIG_BINARY_FOLDER=""
 CONFIG_DOWNLOAD_FOLDER=""
-CONFIG_LOCALMIRROR="https://www.codeaurora.org/mirrored_source/quic/qsdk/"
-CONFIG_GIT_MIRROR="https://source.codeaurora.org/quic/qsdk/"
 CONFIG_EXTERNAL_LINUX_CONFIG_NAME=""
 CONFIG_AUTOREBUILD=y
 CONFIG_BUILD_SUFFIX=""
